@@ -195,7 +195,7 @@ foreach ($apiUrls as $i => $url) {
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $postFields,
         CURLOPT_HTTPHEADER => $headers,
-        CURLOPT_TIMEOUT => 20,
+        CURLOPT_TIMEOUT => 120,
     ]);
     $curlArray[$i] = $ch;
     curl_multi_add_handle($mh, $ch);
