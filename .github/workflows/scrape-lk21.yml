@@ -7,10 +7,22 @@ on:
         description: 'Link halaman utama'
         required: true
         default: 'https://tv6.lk21official.cc/genre/film'
+      startpage:
+        description: 'Halaman mulai'
+        required: false
+        default: '1'
+      endpage:
+        description: 'Halaman akhir (0 = auto)'
+        required: false
+        default: '0'
       limitfilm:
         description: 'Limit film (0 = semua)'
         required: false
         default: '10'
+      group:
+        description: 'Group title'
+        required: false
+        default: 'Movies LK21'
 
 jobs:
   scrape:
@@ -26,14 +38,16 @@ jobs:
           php-version: '8.2'
           extensions: curl
 
-      - name: Jalankan scraper
+      - name: Jalankan PHP built-in server
         run: |
-          php scraper/lk.php \
-            --link="${{ github.event.inputs.link }}" \
-            --limitfilm="${{ github.event.inputs.limitfilm }}" \
-            > playlist.m3u
-          
-          echo "✅ Selesai! Hasil di playlist.m3u"
+          cd scraper
+          php -S 127.0.0.1:8080 &
+          SERVER_PID=$!
+          sleep 2
+          curl "http://127.0.0.1:8080/lk.php?link=${{ github.event.inputs.link }}&startpage=${{ github.event.inputs.startpage }}&endpage=${{ github.event.inputs.endpage }}&limitfilm=${{ github.event.inputs.limitfilm }}&group=${{ github.event.inputs.group }}" --output ../playlist.m3u
+          kill $SERVER_PID
+          cd ..
+          echo "✅ Selesai!"
 
       - name: Upload hasil
         uses: actions/upload-artifact@v4
