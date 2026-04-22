@@ -27,7 +27,7 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -38,16 +38,22 @@ jobs:
           php-version: '8.2'
           extensions: curl
 
-      - name: Jalankan PHP built-in server
+      - name: Jalankan scraper via CLI
         run: |
-          cd scraper
-          php -S 127.0.0.1:8080 &
-          SERVER_PID=$!
-          sleep 2
-          curl "http://127.0.0.1:8080/lk.php?link=${{ github.event.inputs.link }}&startpage=${{ github.event.inputs.startpage }}&endpage=${{ github.event.inputs.endpage }}&limitfilm=${{ github.event.inputs.limitfilm }}&group=${{ github.event.inputs.group }}" --output ../playlist.m3u
-          kill $SERVER_PID
-          cd ..
-          echo "✅ Selesai!"
+          php scraper/lk.php \
+            --link="${{ github.event.inputs.link }}" \
+            --startpage="${{ github.event.inputs.startpage }}" \
+            --endpage="${{ github.event.inputs.endpage }}" \
+            --limitfilm="${{ github.event.inputs.limitfilm }}" \
+            --group="${{ github.event.inputs.group }}" \
+            > playlist.m3u
+
+          echo "✅ Selesai generate playlist"
+
+      - name: Tampilkan hasil (debug)
+        run: |
+          echo "===== ISI PLAYLIST ====="
+          cat playlist.m3u || echo "File kosong / gagal generate"
 
       - name: Upload hasil
         uses: actions/upload-artifact@v4
