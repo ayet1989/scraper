@@ -1,0 +1,42 @@
+name: Scrape LK21 Movies
+
+on:
+  workflow_dispatch:
+    inputs:
+      link:
+        description: 'Link halaman utama'
+        required: true
+        default: 'https://tv6.lk21official.cc/genre/film'
+      limitfilm:
+        description: 'Limit film (0 = semua)'
+        required: false
+        default: '10'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: curl
+
+      - name: Jalankan scraper
+        run: |
+          php scraper/lk.php \
+            --link="${{ github.event.inputs.link }}" \
+            --limitfilm="${{ github.event.inputs.limitfilm }}" \
+            > playlist.m3u
+          
+          echo "✅ Selesai! Hasil di playlist.m3u"
+
+      - name: Upload hasil
+        uses: actions/upload-artifact@v4
+        with:
+          name: lk21-playlist
+          path: playlist.m3u
