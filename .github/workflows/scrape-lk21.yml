@@ -38,7 +38,7 @@ jobs:
           php-version: '8.2'
           extensions: curl
 
-      - name: Jalankan scraper via CLI
+      - name: Jalankan scraper + debug
         run: |
           php scraper/lk.php \
             --link="${{ github.event.inputs.link }}" \
@@ -46,14 +46,15 @@ jobs:
             --endpage="${{ github.event.inputs.endpage }}" \
             --limitfilm="${{ github.event.inputs.limitfilm }}" \
             --group="${{ github.event.inputs.group }}" \
-            > playlist.m3u
+            > playlist.m3u 2> error.log || true
+
+          echo "===== ERROR LOG ====="
+          cat error.log || echo "tidak ada error log"
+
+          echo "===== OUTPUT ====="
+          cat playlist.m3u || echo "output kosong"
 
           echo "✅ Selesai generate playlist"
-
-      - name: Tampilkan hasil (debug)
-        run: |
-          echo "===== ISI PLAYLIST ====="
-          cat playlist.m3u || echo "File kosong / gagal generate"
 
       - name: Upload hasil
         uses: actions/upload-artifact@v4
